@@ -1,2 +1,3 @@
 # opengl-tutorial
-Learning Open GL 
+### Learning Open GL
+https://learnopengl.com/Introduction
