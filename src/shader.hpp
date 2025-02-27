@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../glad/glad.h"
+#include "glad.h"
 #include <stddef.h>
 
 #define MAX_CODE_SIZE 2048
