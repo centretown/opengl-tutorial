@@ -21,10 +21,22 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
   glViewport(0, 0, width, height);
 }
 
-float mixValue = 0.5f;
-float fovValue = 45.0f;
+static float deltaTime = 0.0f;    // Time between current frame and last frame
+static float lastFrame = 0.0f;    // Time of last frame
+static float currentFrame = 0.0f; // Time of last frame
+
+static glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+static glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+static glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+static float mixValue = 0.5f;
+static float fovValue = 45.0f;
 
 void processInput(GLFWwindow *window) {
+  currentFrame = glfwGetTime();
+  deltaTime = currentFrame - lastFrame;
+  lastFrame = currentFrame;
+
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
@@ -52,6 +64,18 @@ void processInput(GLFWwindow *window) {
     if (fovValue <= MIN_ANGLE)
       fovValue = MIN_ANGLE;
   }
+
+  const float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    cameraPos += cameraSpeed * cameraFront;
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    cameraPos -= cameraSpeed * cameraFront;
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    cameraPos -=
+        glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    cameraPos +=
+        glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 }
 
 ShaderCode shaderCode("assets/shaders/gls330/shader.vert",
@@ -172,7 +196,11 @@ int main(int argc, char **argv) {
 
     shader.use();
     glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 view = glm::mat4(1.0f);
+
+    // glm::mat4 view;
+    glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    // view = glm::mat4(1.0f);
+
     glm::mat4 projection = glm::mat4(1.0f);
 
     view = glm::translate(view, glm::vec3(0.0f, 0.5f, -4.0f));
@@ -213,23 +241,3 @@ int main(int argc, char **argv) {
   glfwTerminate();
   return 0;
 }
-
-// float vertices[] = {
-//     // positions          // colors           // texture coords
-//     0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-//     0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-//     -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-//     -0.5f, 0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
-// };
-
-// // position attribute
-// glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void
-// *)0); glEnableVertexAttribArray(0);
-// // color attribute
-// glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-//                       (void *)(3 * sizeof(float)));
-// glEnableVertexAttribArray(1);
-// // texture coord attribute
-// glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-//                       (void *)(6 * sizeof(float)));
-// glEnableVertexAttribArray(2);
