@@ -51,7 +51,9 @@ ShaderCode sourceCode("assets/shaders/gls330/source.vert",
                       "assets/shaders/gls330/source.frag");
 
 const char *textureFileName = "assets/textures/container2.png";
+const char *specularFileName = "assets/textures/container2_specular.png";
 TextureOptions textureOptions;
+TextureOptions specularOptions;
 
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
@@ -147,8 +149,10 @@ int main(int argc, char **argv) {
   glEnableVertexAttribArray(0);
 
   unsigned int diffuseMap = MakeTexture(textureFileName, &textureOptions);
+  unsigned int specularMap = MakeTexture(specularFileName, &specularOptions);
   targetShader.use();
   targetShader.setInt("material.diffuse", 0);
+  targetShader.setInt("material.specular", 1);
 
   while (!glfwWindowShouldClose(window)) {
     currentFrame = glfwGetTime();
@@ -169,7 +173,7 @@ int main(int argc, char **argv) {
     targetShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
     targetShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
-    targetShader.setFloat("material.shininess", 64.0f);
+    targetShader.setFloat("material.shininess", 128.0f);
 
     glm::mat4 projection = glm::perspective(
         glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT,
@@ -183,7 +187,8 @@ int main(int argc, char **argv) {
     // bind diffuse map
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, diffuseMap);
-
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, specularMap);
     // render the cube
     glBindVertexArray(targetVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
