@@ -27,7 +27,7 @@ int ShaderCode::Load() {
   return 1;
 }
 
-Shader::Shader(const char *vShaderCode, const char *fShaderCode) {
+Shader::Shader(const char *vertexCode, const char *fragmentCode) {
   unsigned int vertex;
   unsigned int fragment;
   int success;
@@ -35,7 +35,7 @@ Shader::Shader(const char *vShaderCode, const char *fShaderCode) {
 
   // compile shaders
   vertex = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertex, 1, &vShaderCode, NULL);
+  glShaderSource(vertex, 1, &vertexCode, NULL);
   glCompileShader(vertex);
 
   // check for compile errors if any
@@ -48,7 +48,7 @@ Shader::Shader(const char *vShaderCode, const char *fShaderCode) {
   };
 
   fragment = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragment, 1, &fShaderCode, NULL);
+  glShaderSource(fragment, 1, &fragmentCode, NULL);
   glCompileShader(fragment);
   glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
   if (!success) {
