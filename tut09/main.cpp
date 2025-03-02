@@ -175,6 +175,7 @@ int main(int argc, char **argv) {
     targetShader.setVec3("light.position", camera.Position);
     targetShader.setVec3("light.direction", camera.Front);
     targetShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+    targetShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
 
     // targetShader.setVec3("light.direction", -0.2f, -1.0f, -0.3f);
     // targetShader.setVec3("light.position", lightPos);
