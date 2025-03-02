@@ -4,7 +4,7 @@
 #include <glm/ext/matrix_float4x4.hpp>
 #include <stddef.h>
 
-#define MAX_CODE_SIZE 2048
+#define MAX_CODE_SIZE 8192
 
 enum ShaderErrorCode {
   SHADER_VALID,
