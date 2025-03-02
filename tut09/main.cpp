@@ -28,7 +28,7 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 GLFWwindow *InitWindow();
 
 // camera
-Camera camera(glm::vec3(1.0f, 1.0f, 4.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 4.0f));
 float lastX = SCREEN_WIDTH / 2.0f;
 float lastY = SCREEN_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -154,6 +154,13 @@ int main(int argc, char **argv) {
   targetShader.setInt("material.diffuse", 0);
   targetShader.setInt("material.specular", 1);
 
+  glm::vec3 cubePositions[] = {
+      glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.0f, -15.0f),
+      glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(-3.8f, -2.0f, -12.3f),
+      glm::vec3(2.4f, -0.4f, -3.5f),  glm::vec3(-1.7f, 3.0f, -7.5f),
+      glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
+      glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f)};
+
   while (!glfwWindowShouldClose(window)) {
     currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
@@ -165,12 +172,22 @@ int main(int argc, char **argv) {
 
     // be sure to activate shader when setting uniforms/drawing objects
     targetShader.use();
-    targetShader.setVec3("light.position", lightPos);
+    targetShader.setVec3("light.position", camera.Position);
+    targetShader.setVec3("light.direction", camera.Front);
+    targetShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+
+    // targetShader.setVec3("light.direction", -0.2f, -1.0f, -0.3f);
+    // targetShader.setVec3("light.position", lightPos);
+    //
     targetShader.setVec3("viewPos", camera.Position);
 
     targetShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
     targetShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
     targetShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+    targetShader.setFloat("light.constant", 1.0f);
+    targetShader.setFloat("light.linear", 0.09f);
+    targetShader.setFloat("light.quadratic", 0.032f);
 
     targetShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
     targetShader.setFloat("material.shininess", 64.0f);
@@ -191,20 +208,30 @@ int main(int argc, char **argv) {
     glBindTexture(GL_TEXTURE_2D, specularMap);
     // render the cube
     glBindVertexArray(targetVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    // glDrawArrays(GL_TRIANGLES, 0, 36);
+    for (unsigned int i = 0; i < 10; i++) {
+      glm::mat4 model = glm::mat4(1.0f);
+      model = glm::translate(model, cubePositions[i]);
+      float angle = 20.0f * i;
+      model =
+          glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+      targetShader.setMat4("model", model);
 
-    // also draw the lamp object
-    sourceShader.use();
-    sourceShader.setMat4("projection", projection);
-    sourceShader.setMat4("view", view);
+      glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
 
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, lightPos);
-    model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
-    sourceShader.setMat4("model", model);
+    // draw the lamp object
+    // sourceShader.use();
+    // sourceShader.setMat4("projection", projection);
+    // sourceShader.setMat4("view", view);
 
-    glBindVertexArray(sourceVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    // model = glm::mat4(1.0f);
+    // model = glm::translate(model, lightPos);
+    // model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+    // sourceShader.setMat4("model", model);
+
+    // glBindVertexArray(sourceVAO);
+    // glDrawArrays(GL_TRIANGLES, 0, 36);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -222,13 +249,17 @@ void processInput(GLFWwindow *window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
 
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS ||
+      glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     camera.ProcessKeyboard(FORWARD, deltaTime);
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS ||
+      glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     camera.ProcessKeyboard(BACKWARD, deltaTime);
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS ||
+      glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
     camera.ProcessKeyboard(LEFT, deltaTime);
-  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS ||
+      glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
     camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 

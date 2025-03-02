@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
   glViewport(0, 0, 800, 600);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-  Shader shader(shaderCode.vertexCode, shaderCode.fragmentCode);
+  Shader shader(&shaderCode);
   if (!shader.IsValid()) {
     return -1;
   }

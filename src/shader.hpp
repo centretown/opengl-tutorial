@@ -28,11 +28,15 @@ struct ShaderCode {
 struct Shader {
   // the program ID
   unsigned int ProgramID = (unsigned int)-1;
+  const char *vertexPath = NULL;
+  const char *fragmentPath = NULL;
+  ShaderCode *code = NULL;
   ShaderErrorCode status = SHADER_INVALID;
 
   // constructor reads and builds the shader
-  Shader(const char *vertexPath, const char *fragmentPath);
+  Shader(ShaderCode *code);
   bool IsValid() { return status == SHADER_VALID; }
+
   // use/activate the shader
   void use() { glUseProgram(ProgramID); }
   // utility uniform functions

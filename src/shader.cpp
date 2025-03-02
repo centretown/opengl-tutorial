@@ -27,7 +27,10 @@ int ShaderCode::Load() {
   return 1;
 }
 
-Shader::Shader(const char *vertexCode, const char *fragmentCode) {
+Shader::Shader(ShaderCode *code) : code{code} {
+  char *vertexCode = code->vertexCode;
+  char *fragmentCode = code->fragmentCode;
+
   unsigned int vertex;
   unsigned int fragment;
   int success;
@@ -42,7 +45,8 @@ Shader::Shader(const char *vertexCode, const char *fragmentCode) {
   glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-    printf("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n%s\n", infoLog);
+    printf("'%s' ERROR::SHADER::VERTEX::COMPILATION_FAILED\n%s\n",
+           code->vertexPath, infoLog);
     status = SHADER_ERR_COMPILE_VERTEX;
     return;
   };
@@ -53,7 +57,8 @@ Shader::Shader(const char *vertexCode, const char *fragmentCode) {
   glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-    printf("ERROR::SHADER::SHADER::COMPILATION_FAILED\n%s\n", infoLog);
+    printf("'%s' ERROR::SHADER::SHADER::COMPILATION_FAILED\n%s\n",
+           code->fragmentPath, infoLog);
     status = SHADER_ERR_COMPILE_FRAGMENT;
     return;
   }
@@ -67,7 +72,8 @@ Shader::Shader(const char *vertexCode, const char *fragmentCode) {
   glGetProgramiv(ProgramID, GL_LINK_STATUS, &success);
   if (!success) {
     glGetProgramInfoLog(ProgramID, 512, NULL, infoLog);
-    printf("ERROR::SHADER::PROGRAM::LINKING_FAILED\n%s\n", infoLog);
+    printf("'%s' '%s' ERROR::SHADER::PROGRAM::LINKING_FAILED\n%s\n",
+           code->vertexPath, code->fragmentPath, infoLog);
     status = SHADER_ERR_LINK_PROGRAM;
     return;
   }
