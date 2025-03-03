@@ -44,7 +44,7 @@ static float currentFrame = 0.0f; // Time of last frame
 // static float mixValue = 0.5f;
 // static float fovValue = 45.0f;
 //
-ShaderCode targetCode("assets/shaders/gls330/target.vert",
+ShaderCode modelCode("assets/shaders/gls330/target.vert",
                       "assets/shaders/gls330/target.frag");
 
 ShaderCode sourceCode("assets/shaders/gls330/source.vert",
@@ -59,7 +59,7 @@ glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 int main(int argc, char **argv) {
 
-  if (!targetCode.Load() || !sourceCode.Load()) {
+  if (!modelCode.Load() || !sourceCode.Load()) {
     return -1;
   }
 
@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
       -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
   };
 
-  Shader targetShader(&targetCode);
+  Shader targetShader(&modelCode);
   Shader sourceShader(&sourceCode);
   if (!targetShader.IsValid() || !sourceShader.IsValid()) {
     glfwTerminate();

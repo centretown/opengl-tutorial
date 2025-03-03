@@ -1,1 +1,2 @@
- -Isrc
+-Isrc
+-I/home/dave/src/assimp/include
