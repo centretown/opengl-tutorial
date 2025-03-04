@@ -1,4 +1,5 @@
 #include "mesh.hpp"
+#include <glm/ext/vector_float3.hpp>
 
 Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices,
            vector<Texture> textures)
@@ -40,8 +41,8 @@ void Mesh::Draw(Shader &shader) {
   unsigned int diffuseNr = 1;
   unsigned int specularNr = 1;
   for (unsigned int i = 0; i < textures.size(); i++) {
-    glActiveTexture(GL_TEXTURE0 +
-                    i); // activate proper texture unit before binding
+    // activate proper texture unit before binding
+    glActiveTexture(GL_TEXTURE0 + i);
     // retrieve texture number (the N in diffuse_textureN)
     string number;
     string name = textures[i].type;

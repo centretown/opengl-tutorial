@@ -3,6 +3,7 @@
 
 #include <assimp/Importer.hpp>  // C++ importer interface
 #include <assimp/postprocess.h> // Post processing flags
+#include <glm/detail/qualifier.hpp>
 
 void Model::Draw(Shader &shader) {
   for (unsigned int i = 0; i < meshes.size(); i++)
@@ -22,6 +23,30 @@ void Model::loadModel(string path) {
   directory = path.substr(0, path.find_last_of('/'));
 
   processNode(scene->mRootNode, scene);
+
+  if (meshes.size() == 1 && textures_loaded.size() == 0) {
+    Mesh &mesh = meshes[0];
+    // loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+    TextureOptions options = (TextureOptions){
+        .minFilter = GL_LINEAR_MIPMAP_LINEAR,
+        .magFilter = GL_LINEAR,
+        .wrapS = GL_REPEAT,
+        .wrapT = GL_REPEAT,
+    };
+    string filename = "assets/textures/red.png";
+    Texture texture = {0};
+    texture.id = MakeTexture(filename.c_str(), &options);
+    texture.type = "texture_diffuse";
+    texture.path = filename;
+    mesh.textures.push_back(texture);
+    textures_loaded.push_back(texture);
+  }
+
+  printf("Model:\n\t# of meshes = %ld\n\t# of textures = %ld\n", meshes.size(),
+         textures_loaded.size());
+  printf("Bounding Box min={x=%.2f, y=%.2f, z=%.2f} max={x=%.2f, y=%.2f, "
+         "z=%.2f}\n",
+         min.x, min.y, min.z, max.x, max.y, max.z);
 }
 
 void Model::processNode(aiNode *node, const aiScene *scene) {
@@ -36,6 +61,21 @@ void Model::processNode(aiNode *node, const aiScene *scene) {
   }
 }
 
+void Model::MinMax(glm::vec3 vector) {
+  if (vector.x < min.x)
+    min.x = vector.x;
+  if (vector.x > max.x)
+    max.x = vector.x;
+  if (vector.y < min.y)
+    min.y = vector.y;
+  if (vector.y > max.y)
+    max.y = vector.y;
+  if (vector.z < min.z)
+    min.z = vector.z;
+  if (vector.z > max.z)
+    max.z = vector.z;
+}
+
 Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
   vector<Vertex> vertices;
   vector<unsigned int> indices;
@@ -47,8 +87,9 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
     vector.x = mesh->mVertices[i].x;
     vector.y = mesh->mVertices[i].y;
     vector.z = mesh->mVertices[i].z;
-    vertex.Position =
-        vector; // process vertex positions, normals and texture coordinates
+    vertex.Position = vector;
+
+    MinMax(vector);
 
     vector.x = mesh->mNormals[i].x;
     vector.y = mesh->mNormals[i].y;
@@ -84,7 +125,6 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
         material, aiTextureType_SPECULAR, "texture_specular");
     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
   }
-
   return Mesh(vertices, indices, textures);
 }
 

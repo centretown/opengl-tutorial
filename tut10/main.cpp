@@ -17,7 +17,8 @@
 // #define MIN_ANGLE 15.0f
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
-
+float windowWidth = (float)SCREEN_WIDTH;
+float windowHeight = (float)SCREEN_HEIGHT;
 // forward decls.
 void processInput(GLFWwindow *window);
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -45,7 +46,7 @@ static float currentFrame = 0.0f; // Time of last frame
 // static float fovValue = 45.0f;
 //
 ShaderCode modelCode("assets/shaders/gls330/target.vert",
-                      "assets/shaders/gls330/target.frag");
+                     "assets/shaders/gls330/target.frag");
 
 ShaderCode sourceCode("assets/shaders/gls330/source.vert",
                       "assets/shaders/gls330/source.frag");
@@ -225,9 +226,9 @@ int main(int argc, char **argv) {
     targetShader.setFloat("spotLight.outerCutOff",
                           glm::cos(glm::radians(15.0f)));
 
-    glm::mat4 projection = glm::perspective(
-        glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT,
-        0.1f, 100.0f);
+    glm::mat4 projection =
+        glm::perspective(glm::radians(camera.Zoom),
+                         (float)1 / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
     glm::mat4 view = camera.GetViewMatrix();
     targetShader.setMat4("projection", projection);
     targetShader.setMat4("view", view);
@@ -299,6 +300,8 @@ void processInput(GLFWwindow *window) {
 }
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+  windowWidth = width;
+  windowHeight = height;
   glViewport(0, 0, width, height);
 }
 
