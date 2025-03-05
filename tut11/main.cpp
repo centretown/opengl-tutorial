@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include <cstring>
+#include <glm/ext/matrix_transform.hpp>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -54,6 +55,8 @@ const char *stlDir = "resources/stl";
 const char *objDir = "resources/objects";
 const char *defaultPath = "resources/objects/cyborg/cyborg.obj";
 char modelPath[1024];
+
+float rotation_angle = 0.0f;
 
 int main(int argc, char **argv) {
 
@@ -131,6 +134,10 @@ int main(int argc, char **argv) {
     model = glm::translate(model, glm::vec3(0.0f, diffy, 0.0f));
     // it's a bit too big for our scene, so scale it down
     model = glm::scale(model, glm::vec3(scale, scale, scale));
+    // rotate
+    float angle = 3.14;
+    glm::vec3 axis(0.0f, 1.0f, 0.0f);
+    model = glm::rotate(model, glm::radians(rotation_angle), axis);
     curShader.setMat4("model", model);
 
     curModel.Draw(curShader);
@@ -157,6 +164,14 @@ void processInput(GLFWwindow *window) {
   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS ||
       glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     camera.ProcessKeyboard(BACKWARD, deltaTime);
+
+  if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+    rotation_angle -= 1.0;
+  }
+  if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS) {
+    rotation_angle += 1.0;
+  }
+
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS ||
       glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
     camera.ProcessKeyboard(LEFT, deltaTime);
