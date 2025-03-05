@@ -12,9 +12,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "camera.hpp"
-#include "filesystem.h"
-#include "model.hpp"
 #include "shader.hpp"
+#include "texture.hpp"
 
 #include <assimp/Importer.hpp>  // C++ importer interface
 #include <assimp/postprocess.h> // Post processing flags
@@ -38,6 +37,8 @@ GLFWwindow *InitWindow();
 void InitializeLights(Shader &targetShader, Camera &camera);
 void UpdateLights(Shader &targetShader, Camera &camera);
 
+// void DrawContainers(float scale);
+void DrawContainers(float scale, Shader &shader, unsigned int texture, int VAO);
 // camera
 Camera camera(glm::vec3(0.0f, 1.0f, 3.0f));
 float lastX = SCREEN_WIDTH / 2.0f;
@@ -48,31 +49,21 @@ static float deltaTime = 0.0f;    // Time between current frame and last frame
 static float lastFrame = 0.0f;    // Time of last frame
 static float currentFrame = 0.0f; // Time of last frame
 
-ShaderCode depthCode("assets/shaders/gls330/target.vert",
-                     "assets/shaders/gls330/target.frag");
+ShaderCode depthCode("assets/shaders/gls330/depth.vert",
+                     "assets/shaders/gls330/depth.frag");
 
-const char *stlDir = "resources/stl";
-const char *objDir = "resources/objects";
-const char *defaultPath = "resources/objects/cyborg/cyborg.obj";
-char modelPath[1024];
+ShaderCode singleCode("assets/shaders/gls330/depth.vert",
+                      "assets/shaders/gls330/single.frag");
 
 float rotation_angle = 0.0f;
 
 int main(int argc, char **argv) {
 
-  if (argc > 1) {
-    const char *opt = "";
-    const char *obj = argv[1];
-    if (argc > 2 && !strncmp("stl", obj, 3)) {
-      snprintf(modelPath, sizeof(modelPath), "%s/%s.stl", stlDir, argv[2]);
-    } else {
-      snprintf(modelPath, sizeof(modelPath), "%s/%s/%s.obj", objDir, obj, obj);
-    }
-  } else {
-    strncpy(modelPath, defaultPath, sizeof(modelPath));
+  if (!depthCode.Load()) {
+    return -1;
   }
 
-  if (!depthCode.Load()) {
+  if (!singleCode.Load()) {
     return -1;
   }
 
@@ -89,6 +80,11 @@ int main(int argc, char **argv) {
   }
 
   glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+  glEnable(GL_STENCIL_TEST);
+  glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
   glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
   Shader curShader(&depthCode);
@@ -96,18 +92,90 @@ int main(int argc, char **argv) {
     glfwTerminate();
     return -1;
   }
-  Model curModel(FileSystem::getPath(modelPath));
-  // calculate scale
-  float scale = 1.0;
-  float diffx = curModel.max.x - curModel.min.x;
-  float diffy = curModel.max.y - curModel.min.y;
-  float diff = fmax(diffx, diffy);
-  if (diff != 0.0f)
-    scale = 1.0 / diff;
-  float scaleY = 1.0 / diffy;
-  diffy = (curModel.min.y + diffy) * scaleY;
-  // diffx /= 2.0f;
-  InitializeLights(curShader, camera);
+  Shader singleShader(&singleCode);
+  if (!singleShader.IsValid()) {
+    glfwTerminate();
+    return -1;
+  }
+  // set up vertex data (and buffer(s)) and configure vertex attributes
+  // ------------------------------------------------------------------
+  float cubeVertices[] = {
+      // positions          // texture Coords
+      -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 0.0f,
+      0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
+      -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+
+      -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
+      0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+      -0.5f, 0.5f,  0.5f,  0.0f, 1.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f,
+
+      -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 1.0f, 1.0f,
+      -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+      -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  0.5f,  1.0f, 0.0f,
+
+      0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
+      0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 0.0f, 1.0f,
+      0.5f,  -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+      -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 1.0f,
+      0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
+      -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+
+      -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
+      0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+      -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f};
+
+  // positions          // texture Coords (note we set these higher than 1
+  // (together with GL_REPEAT as texture wrapping mode). this will cause the
+  // floor texture to repeat)
+  float planeVertices[] = {
+      5.0f, -0.5f, 5.0f,  2.0f,  0.0f,  -5.0f, -0.5f, 5.0f,
+      0.0f, 0.0f,  -5.0f, -0.5f, -5.0f, 0.0f,  2.0f,
+
+      5.0f, -0.5f, 5.0f,  2.0f,  0.0f,  -5.0f, -0.5f, -5.0f,
+      0.0f, 2.0f,  5.0f,  -0.5f, -5.0f, 2.0f,  2.0f};
+
+  unsigned int cubeVAO, cubeVBO;
+  glGenVertexArrays(1, &cubeVAO);
+  glGenBuffers(1, &cubeVBO);
+  glBindVertexArray(cubeVAO);
+  glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices,
+               GL_STATIC_DRAW);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                        (void *)(3 * sizeof(float)));
+  glBindVertexArray(0);
+  // plane VAO
+  unsigned int planeVAO, planeVBO;
+  glGenVertexArrays(1, &planeVAO);
+  glGenBuffers(1, &planeVBO);
+  glBindVertexArray(planeVAO);
+  glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices,
+               GL_STATIC_DRAW);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                        (void *)(3 * sizeof(float)));
+  glBindVertexArray(0);
+
+  // load textures
+  // -------------
+  TextureOptions options;
+  unsigned int cubeTexture =
+      MakeTexture("../resources/textures/marble.jpg", &options);
+  unsigned int floorTexture =
+      MakeTexture("../resources/textures/metal.png", &options);
+  curShader.use();
+  curShader.setInt("texture1", 0);
+
+  glEnable(GL_DEPTH_TEST);
+  // glDepthMask(GL_LESS);
+  glEnable(GL_STENCIL_TEST);
 
   while (!glfwWindowShouldClose(window)) {
     currentFrame = glfwGetTime();
@@ -116,31 +184,80 @@ int main(int argc, char **argv) {
     processInput(window);
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    curShader.use();
-
-    UpdateLights(curShader, camera);
-    // view/projection transformations
+    singleShader.use();
+    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 view = camera.GetViewMatrix();
+    glm::vec3 axis(0.0f, 1.0f, 0.0f);
+    view = glm::rotate(view, glm::radians(rotation_angle), axis);
     glm::mat4 projection = glm::perspective(
         glm::radians(camera.Zoom), windowWidth / windowHeight, 0.1f, 100.0f);
-    glm::mat4 view = camera.GetViewMatrix();
+    glBindVertexArray(cubeVAO);
+    singleShader.setMat4("view", view);
+    singleShader.setMat4("projection", projection);
 
-    curShader.setMat4("projection", projection);
+    curShader.use();
     curShader.setMat4("view", view);
+    curShader.setMat4("projection", projection);
 
-    // render the loaded model
-    glm::mat4 model = glm::mat4(1.0f);
-    // translate it down so it's at the center of the scene
-    model = glm::translate(model, glm::vec3(0.0f, diffy, 0.0f));
-    // it's a bit too big for our scene, so scale it down
-    model = glm::scale(model, glm::vec3(scale, scale, scale));
-    // rotate about y-axis
-    glm::vec3 axis(0.0f, 1.0f, 0.0f);
-    model = glm::rotate(model, glm::radians(rotation_angle), axis);
-    curShader.setMat4("model", model);
+    // floor
+    glStencilMask(0x00);
+    glBindVertexArray(planeVAO);
+    glBindTexture(GL_TEXTURE_2D, floorTexture);
+    curShader.setMat4("model", glm::mat4(1.0f));
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
 
-    curModel.Draw(curShader);
+    // 1st. render pass, draw objects as normal, writing to the stencil buffer
+    // --------------------------------------------------------------------
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilMask(0xFF);
+    // cubes
+    //
+    DrawContainers(1.0f, curShader, cubeTexture, cubeVAO);
+    // glBindVertexArray(cubeVAO);
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, cubeTexture);
+    // model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+    // curShader.setMat4("model", model);
+    // glDrawArrays(GL_TRIANGLES, 0, 36);
+    // model = glm::mat4(1.0f);
+    // model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+    // curShader.setMat4("model", model);
+    // glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    // 2nd. render pass: now draw slightly scaled versions of the objects, this
+    // time disabling stencil writing. Because the stencil buffer is now filled
+    // with several 1s. The parts of the buffer that are 1 are not drawn, thus
+    // only drawing the objects' size differences, making it look like borders.
+    // -----------------------------------------------------------------------------------------------------------------------------
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilMask(0x00);
+    glDisable(GL_DEPTH_TEST);
+    // singleShader.use();
+    // float scale = 1.1f;
+    DrawContainers(1.1f, singleShader, cubeTexture, cubeVAO);
+    // cubes
+    // glBindVertexArray(cubeVAO);
+    // glBindTexture(GL_TEXTURE_2D, cubeTexture);
+    // model = glm::mat4(1.0f);
+    // model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+    // model = glm::scale(model, glm::vec3(scale, scale, scale));
+    // singleShader.setMat4("model", model);
+    // glDrawArrays(GL_TRIANGLES, 0, 36);
+    // model = glm::mat4(1.0f);
+    // model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+    // model = glm::scale(model, glm::vec3(scale, scale, scale));
+    // singleShader.setMat4("model", model);
+    // glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    glBindVertexArray(0);
+    glStencilMask(0xFF);
+    glStencilFunc(GL_ALWAYS, 0, 0xFF);
+    glEnable(GL_DEPTH_TEST);
+
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
@@ -307,4 +424,36 @@ void UpdateLights(Shader &targetShader, Camera &camera) {
   targetShader.setVec3("viewPos", camera.Position);
   targetShader.setVec3("spotLight.position", camera.Position);
   targetShader.setVec3("spotLight.direction", camera.Front);
+}
+
+void DrawContainersx(float scale, Shader &shader, unsigned int texture) {
+  // cubes
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glm::mat4 model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+  shader.setMat4("model", model);
+  glDrawArrays(GL_TRIANGLES, 0, 36);
+  model = glm::mat4(1.0f);
+  model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+  shader.setMat4("model", model);
+  glDrawArrays(GL_TRIANGLES, 0, 36);
+}
+
+void DrawContainers(float scale, Shader &shader, unsigned int texture,
+                    int VAO) {
+  glBindVertexArray(VAO);
+  shader.use();
+  // float scale = 1.1f;
+  // cubes
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glm::mat4 model = glm::mat4(1.0f);
+  model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+  model = glm::scale(model, glm::vec3(scale, scale, scale));
+  shader.setMat4("model", model);
+  glDrawArrays(GL_TRIANGLES, 0, 36);
+  model = glm::mat4(1.0f);
+  model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+  model = glm::scale(model, glm::vec3(scale, scale, scale));
+  shader.setMat4("model", model);
+  glDrawArrays(GL_TRIANGLES, 0, 36);
 }

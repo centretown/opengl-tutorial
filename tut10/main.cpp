@@ -45,7 +45,7 @@ static float currentFrame = 0.0f; // Time of last frame
 // static float mixValue = 0.5f;
 // static float fovValue = 45.0f;
 //
-ShaderCode modelCode("assets/shaders/gls330/target.vert",
+ShaderCode depthCode("assets/shaders/gls330/target.vert",
                      "assets/shaders/gls330/target.frag");
 
 ShaderCode sourceCode("assets/shaders/gls330/source.vert",
@@ -60,7 +60,7 @@ TextureOptions specularOptions;
 
 int main(int argc, char **argv) {
 
-  if (!modelCode.Load() || !sourceCode.Load()) {
+  if (!depthCode.Load() || !sourceCode.Load()) {
     return -1;
   }
 
@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
       -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
   };
 
-  Shader targetShader(&modelCode);
+  Shader targetShader(&depthCode);
   Shader sourceShader(&sourceCode);
   if (!targetShader.IsValid() || !sourceShader.IsValid()) {
     glfwTerminate();

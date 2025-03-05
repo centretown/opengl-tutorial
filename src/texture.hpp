@@ -8,7 +8,7 @@ struct TextureOptions {
   // GL_LINEAR: produces a smoother pattern where
   // the individual pixels are less visible.
   // GL_LINEAR_MIPMAP_LINEAR
-  unsigned int minFilter = GL_LINEAR;
+  unsigned int minFilter = GL_LINEAR_MIPMAP_LINEAR;
   unsigned int magFilter = GL_LINEAR;
   // GL_REPEAT: The default behavior for textures. Repeats the texture image.
   // GL_MIRRORED_REPEAT: Same as GL_REPEAT but mirrors the image with each
