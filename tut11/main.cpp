@@ -48,8 +48,8 @@ static float deltaTime = 0.0f;    // Time between current frame and last frame
 static float lastFrame = 0.0f;    // Time of last frame
 static float currentFrame = 0.0f; // Time of last frame
 
-ShaderCode depthCode("assets/shaders/gls330/target.vert",
-                     "assets/shaders/gls330/target.frag");
+Shader curShader("assets/shaders/gls330/target.vert",
+                 "assets/shaders/gls330/target.frag");
 
 const char *stlDir = "resources/stl";
 const char *objDir = "resources/objects";
@@ -72,10 +72,6 @@ int main(int argc, char **argv) {
     strncpy(modelPath, defaultPath, sizeof(modelPath));
   }
 
-  if (!depthCode.Load()) {
-    return -1;
-  }
-
   GLFWwindow *window = InitWindow();
   if (window == NULL) {
     printf("Failed to create GLFW window\n");
@@ -91,7 +87,7 @@ int main(int argc, char **argv) {
   glEnable(GL_DEPTH_TEST);
   glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-  Shader curShader(&depthCode);
+  curShader.Build();
   if (!curShader.IsValid()) {
     glfwTerminate();
     return -1;

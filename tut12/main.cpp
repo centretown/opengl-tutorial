@@ -49,23 +49,15 @@ static float deltaTime = 0.0f;    // Time between current frame and last frame
 static float lastFrame = 0.0f;    // Time of last frame
 static float currentFrame = 0.0f; // Time of last frame
 
-ShaderCode depthCode("assets/shaders/gls330/depth.vert",
-                     "assets/shaders/gls330/depth.frag");
+Shader curShader("assets/shaders/gls330/depth.vert",
+                 "assets/shaders/gls330/depth.frag");
 
-ShaderCode singleCode("assets/shaders/gls330/depth.vert",
-                      "assets/shaders/gls330/single.frag");
+Shader singleShader("assets/shaders/gls330/depth.vert",
+                    "assets/shaders/gls330/single.frag");
 
 float rotation_angle = 0.0f;
 
 int main(int argc, char **argv) {
-
-  if (!depthCode.Load()) {
-    return -1;
-  }
-
-  if (!singleCode.Load()) {
-    return -1;
-  }
 
   GLFWwindow *window = InitWindow();
   if (window == NULL) {
@@ -87,12 +79,12 @@ int main(int argc, char **argv) {
 
   glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-  Shader curShader(&depthCode);
+  curShader.Build();
   if (!curShader.IsValid()) {
     glfwTerminate();
     return -1;
   }
-  Shader singleShader(&singleCode);
+  singleShader.Build();
   if (!singleShader.IsValid()) {
     glfwTerminate();
     return -1;
@@ -396,19 +388,6 @@ void UpdateLights(Shader &targetShader, Camera &camera) {
   targetShader.setVec3("viewPos", camera.Position);
   targetShader.setVec3("spotLight.position", camera.Position);
   targetShader.setVec3("spotLight.direction", camera.Front);
-}
-
-void DrawContainersx(float scale, Shader &shader, unsigned int texture) {
-  // cubes
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, texture);
-  glm::mat4 model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
-  shader.setMat4("model", model);
-  glDrawArrays(GL_TRIANGLES, 0, 36);
-  model = glm::mat4(1.0f);
-  model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
-  shader.setMat4("model", model);
-  glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
 void DrawContainers(float scale, Shader &shader, unsigned int texture,

@@ -44,11 +44,11 @@ static float currentFrame = 0.0f; // Time of last frame
 // static float mixValue = 0.5f;
 // static float fovValue = 45.0f;
 //
-ShaderCode modelCode("assets/shaders/gls330/target.vert",
-                      "assets/shaders/gls330/target.frag");
+Shader targetShader("assets/shaders/gls330/target.vert",
+                    "assets/shaders/gls330/target.frag");
 
-ShaderCode sourceCode("assets/shaders/gls330/source.vert",
-                      "assets/shaders/gls330/source.frag");
+Shader sourceShader("assets/shaders/gls330/source.vert",
+                    "assets/shaders/gls330/source.frag");
 
 const char *textureFileName = "assets/textures/container2.png";
 const char *specularFileName = "assets/textures/container2_specular.png";
@@ -58,10 +58,6 @@ TextureOptions specularOptions;
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 int main(int argc, char **argv) {
-
-  if (!modelCode.Load() || !sourceCode.Load()) {
-    return -1;
-  }
 
   GLFWwindow *window = InitWindow();
 
@@ -114,8 +110,8 @@ int main(int argc, char **argv) {
       -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
   };
 
-  Shader targetShader(&modelCode);
-  Shader sourceShader(&sourceCode);
+  targetShader.Build();
+  sourceShader.Build();
   if (!targetShader.IsValid() || !sourceShader.IsValid()) {
     glfwTerminate();
     return -1;

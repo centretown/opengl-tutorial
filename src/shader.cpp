@@ -3,12 +3,12 @@
 #include <stdio.h>
 #include <string.h>
 
-void ShaderCode::LoadFile(const char *path, long &size,
-                          std::unique_ptr<char[]> &uptr) {
+int Shader::LoadFile(const char *path, long &size,
+                     std::unique_ptr<char[]> &uptr) {
   FILE *file = fopen(path, "r");
   if (file == NULL) {
     printf("unable to open shader program. '%s' %p\n", path, path);
-    return;
+    return SHADER_BUILD_FAIL;
   }
 
   fseek(file, 0, SEEK_END);
@@ -19,19 +19,29 @@ void ShaderCode::LoadFile(const char *path, long &size,
   ptr[size] = 0;
   uptr.reset(ptr);
   fclose(file);
+  return SHADER_BUILD_OK;
 }
 
-int ShaderCode::Load() {
+int Shader::Load() {
   long vertexLength = 0;
   long fragmentLength = 0;
-  LoadFile(vertexPath, vertexLength, vertexCode);
-  LoadFile(fragmentPath, fragmentLength, fragmentCode);
+  if (!LoadFile(vertexPath, vertexLength, vertexCode)) {
+    return SHADER_BUILD_FAIL;
+  }
   printf("read %ld bytes from %s\n", vertexLength, vertexPath);
+  if (!LoadFile(fragmentPath, fragmentLength, fragmentCode)) {
+    return SHADER_BUILD_FAIL;
+  }
   printf("read %ld bytes from %s\n", fragmentLength, fragmentPath);
-  return 1;
+  return SHADER_BUILD_OK;
 }
 
-Shader::Shader(ShaderCode *code) : code{code} {
+int Shader::Build() {
+  if (!Load()) {
+    status = SHADER_ERR_FILE;
+    return SHADER_BUILD_FAIL;
+  }
+
   unsigned int vertex;
   unsigned int fragment;
   int success;
@@ -39,7 +49,7 @@ Shader::Shader(ShaderCode *code) : code{code} {
 
   // compile shaders
   vertex = glCreateShader(GL_VERTEX_SHADER);
-  char *ptr = code->vertexCode.get();
+  char *ptr = vertexCode.get();
   glShaderSource(vertex, 1, &ptr, NULL);
   glCompileShader(vertex);
 
@@ -47,23 +57,23 @@ Shader::Shader(ShaderCode *code) : code{code} {
   glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-    printf("'%s' ERROR::SHADER::VERTEX::COMPILATION_FAILED\n%s\n",
-           code->vertexPath, infoLog);
+    printf("'%s' ERROR::SHADER::VERTEX::COMPILATION_FAILED\n%s\n", vertexPath,
+           infoLog);
     status = SHADER_ERR_COMPILE_VERTEX;
-    return;
+    return SHADER_BUILD_FAIL;
   };
 
   fragment = glCreateShader(GL_FRAGMENT_SHADER);
-  ptr = code->fragmentCode.get();
+  ptr = fragmentCode.get();
   glShaderSource(fragment, 1, &ptr, NULL);
   glCompileShader(fragment);
   glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-    printf("'%s' ERROR::SHADER::SHADER::COMPILATION_FAILED\n%s\n",
-           code->fragmentPath, infoLog);
+    printf("'%s' ERROR::SHADER::SHADER::COMPILATION_FAILED\n%s\n", fragmentPath,
+           infoLog);
     status = SHADER_ERR_COMPILE_FRAGMENT;
-    return;
+    return SHADER_BUILD_FAIL;
   }
 
   // shader Program
@@ -75,10 +85,10 @@ Shader::Shader(ShaderCode *code) : code{code} {
   glGetProgramiv(ProgramID, GL_LINK_STATUS, &success);
   if (!success) {
     glGetProgramInfoLog(ProgramID, 512, NULL, infoLog);
-    printf("'%s' '%s' ERROR::SHADER::PROGRAM::LINKING_FAILED\n%s\n",
-           code->vertexPath, code->fragmentPath, infoLog);
+    printf("'%s' '%s' ERROR::SHADER::PROGRAM::LINKING_FAILED\n%s\n", vertexPath,
+           fragmentPath, infoLog);
     status = SHADER_ERR_LINK_PROGRAM;
-    return;
+    return SHADER_BUILD_FAIL;
   }
 
   // delete the shaders as they're linked into our program now and no longer
@@ -86,4 +96,5 @@ Shader::Shader(ShaderCode *code) : code{code} {
   glDeleteShader(vertex);
   glDeleteShader(fragment);
   status = SHADER_VALID;
+  return SHADER_BUILD_OK;
 }

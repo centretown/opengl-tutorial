@@ -78,15 +78,10 @@ void processInput(GLFWwindow *window) {
         glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 }
 
-ShaderCode shaderCode("assets/shaders/gls330/shader.vert",
-                      "assets/shaders/gls330/shader.frag");
+Shader shader("assets/shaders/gls330/shader.vert",
+              "assets/shaders/gls330/shader.frag");
 
 int main(int argc, char **argv) {
-
-  int status = shaderCode.Load();
-  if (!status) {
-    return -1;
-  }
 
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -95,6 +90,7 @@ int main(int argc, char **argv) {
 
   GLFWwindow *window =
       glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "LearnOpenGL", NULL, NULL);
+  int status = 0;
   if (window == NULL) {
     printf("Failed to create GLFW window\n");
     status = -1;
@@ -112,7 +108,7 @@ int main(int argc, char **argv) {
   glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-  Shader shader(&shaderCode);
+  shader.Build();
   if (!shader.IsValid()) {
     glfwTerminate();
     status = -1;

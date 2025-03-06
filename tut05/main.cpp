@@ -45,21 +45,17 @@ void processInput(GLFWwindow *window) {
   }
 }
 
-ShaderCode shaderCode("assets/shaders/gls330/shader.vert",
-                      "assets/shaders/gls330/shader.frag");
+Shader shader("assets/shaders/gls330/shader.vert",
+              "assets/shaders/gls330/shader.frag");
 
 int main(int argc, char **argv) {
-
-  int status = shaderCode.Load();
-  if (!status) {
-    return -1;
-  }
 
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+  int status = 0;
   GLFWwindow *window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
   if (window == NULL) {
     printf("Failed to create GLFW window\n");
@@ -78,7 +74,7 @@ int main(int argc, char **argv) {
   glViewport(0, 0, 800, 600);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-  Shader shader(&shaderCode);
+  shader.Build();
   if (!shader.IsValid()) {
     return -1;
   }

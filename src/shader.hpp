@@ -14,29 +14,24 @@ enum ShaderErrorCode {
   SHADER_ERR_LINK_PROGRAM,
 };
 
-struct ShaderCode {
+#define SHADER_BUILD_FAIL 0
+#define SHADER_BUILD_OK 1
+
+struct Shader {
   const char *vertexPath = NULL;
   const char *fragmentPath = NULL;
   std::unique_ptr<char[]> vertexCode;
   std::unique_ptr<char[]> fragmentCode;
-  ShaderCode(const char *vertexPath, const char *fragmentPath)
-      : vertexPath{vertexPath}, fragmentPath{fragmentPath} {}
-  int Load();
-  void LoadFile(const char *path, long &size, std::unique_ptr<char[]> &uptr);
-};
-
-struct Shader {
   // the program ID
   unsigned int ProgramID = (unsigned int)-1;
-  const char *vertexPath = NULL;
-  const char *fragmentPath = NULL;
-  ShaderCode *code = NULL;
   ShaderErrorCode status = SHADER_INVALID;
 
   // constructor reads and builds the shader
-  Shader(ShaderCode *code);
-  bool IsValid() { return status == SHADER_VALID; }
+  Shader(const char *vertexPath, const char *fragmentPath)
+      : vertexPath{vertexPath}, fragmentPath{fragmentPath} {}
 
+  bool IsValid() { return status == SHADER_VALID; }
+  int Build();
   // use/activate the shader
   void use() { glUseProgram(ProgramID); }
   // utility uniform functions
@@ -85,4 +80,8 @@ struct Shader {
     glUniformMatrix4fv(glGetUniformLocation(ProgramID, name), 1, GL_FALSE,
                        &mat[0][0]);
   }
+
+private:
+  int Load();
+  int LoadFile(const char *path, long &size, std::unique_ptr<char[]> &uptr);
 };
