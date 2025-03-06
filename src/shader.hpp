@@ -2,9 +2,8 @@
 
 #include "glad.h"
 #include <glm/ext/matrix_float4x4.hpp>
+#include <memory>
 #include <stddef.h>
-
-#define MAX_CODE_SIZE 8192
 
 enum ShaderErrorCode {
   SHADER_VALID,
@@ -16,13 +15,14 @@ enum ShaderErrorCode {
 };
 
 struct ShaderCode {
-  char vertexCode[MAX_CODE_SIZE] = {0};
-  char fragmentCode[MAX_CODE_SIZE] = {0};
   const char *vertexPath = NULL;
   const char *fragmentPath = NULL;
+  std::unique_ptr<char[]> vertexCode;
+  std::unique_ptr<char[]> fragmentCode;
   ShaderCode(const char *vertexPath, const char *fragmentPath)
       : vertexPath{vertexPath}, fragmentPath{fragmentPath} {}
   int Load();
+  void LoadFile(const char *path, long &size, std::unique_ptr<char[]> &uptr);
 };
 
 struct Shader {

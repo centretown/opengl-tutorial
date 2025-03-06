@@ -1,36 +1,37 @@
 #include "shader.hpp"
+#include <memory>
 #include <stdio.h>
+#include <string.h>
+
+void ShaderCode::LoadFile(const char *path, long &size,
+                          std::unique_ptr<char[]> &uptr) {
+  FILE *file = fopen(path, "r");
+  if (file == NULL) {
+    printf("unable to open shader program. '%s' %p\n", path, path);
+    return;
+  }
+
+  fseek(file, 0, SEEK_END);
+  size = ftell(file);
+  fseek(file, 0, SEEK_SET);
+  char *ptr = new char[size + 1];
+  fread(ptr, 1, size, file);
+  ptr[size] = 0;
+  uptr.reset(ptr);
+  fclose(file);
+}
 
 int ShaderCode::Load() {
-  FILE *vertexFile = fopen(vertexPath, "r");
-  if (vertexFile == NULL) {
-    printf("unable to open vertex program. '%s' %p\n", vertexPath, vertexFile);
-    return 0;
-  }
-  int count = fread(vertexCode, 1, sizeof(vertexCode), vertexFile);
-  fclose(vertexFile);
-  vertexCode[count] = 0;
-  printf("read %d bytes from %s\n", count, vertexPath);
-  // printf("\n%s\n\n", vertexCode);
-
-  FILE *fragmentFile = fopen(fragmentPath, "r");
-  if (fragmentFile == NULL) {
-    printf("unable to open fragment program. '%s'\n", fragmentPath);
-    return 0;
-  }
-  count = fread(fragmentCode, 1, sizeof(fragmentCode), fragmentFile);
-  fclose(fragmentFile);
-  fragmentCode[count] = 0;
-  printf("read %d bytes from %s\n", count, fragmentPath);
-  // printf("\n%s\n\n", fragmentCode);
-
+  long vertexLength = 0;
+  long fragmentLength = 0;
+  LoadFile(vertexPath, vertexLength, vertexCode);
+  LoadFile(fragmentPath, fragmentLength, fragmentCode);
+  printf("read %ld bytes from %s\n", vertexLength, vertexPath);
+  printf("read %ld bytes from %s\n", fragmentLength, fragmentPath);
   return 1;
 }
 
 Shader::Shader(ShaderCode *code) : code{code} {
-  char *vertexCode = code->vertexCode;
-  char *fragmentCode = code->fragmentCode;
-
   unsigned int vertex;
   unsigned int fragment;
   int success;
@@ -38,7 +39,8 @@ Shader::Shader(ShaderCode *code) : code{code} {
 
   // compile shaders
   vertex = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertex, 1, &vertexCode, NULL);
+  char *ptr = code->vertexCode.get();
+  glShaderSource(vertex, 1, &ptr, NULL);
   glCompileShader(vertex);
 
   // check for compile errors if any
@@ -52,7 +54,8 @@ Shader::Shader(ShaderCode *code) : code{code} {
   };
 
   fragment = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragment, 1, &fragmentCode, NULL);
+  ptr = code->fragmentCode.get();
+  glShaderSource(fragment, 1, &ptr, NULL);
   glCompileShader(fragment);
   glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
   if (!success) {
