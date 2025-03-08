@@ -179,7 +179,7 @@ int main(int argc, char **argv) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     singleShader.use();
-    glm::mat4 model = glm::mat4(1.0f);
+    // glm::mat4 model = glm::mat4(1.0f);
     glm::mat4 view = camera.GetViewMatrix();
     glm::vec3 axis(0.0f, 1.0f, 0.0f);
     view = glm::rotate(view, glm::radians(rotation_angle), axis);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glad.h"
+#include <glad.h>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <memory>
 #include <stddef.h>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glad.h"
+#include <glad.h>
 
 struct TextureOptions {
   // GL_NEAREST: results in blocked patterns where we can clearly see the pixels

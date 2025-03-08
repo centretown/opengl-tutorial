@@ -61,7 +61,6 @@ float rotation_angle = 0.0f;
 int main(int argc, char **argv) {
 
   if (argc > 1) {
-    const char *opt = "";
     const char *obj = argv[1];
     if (argc > 2 && !strncmp("stl", obj, 3)) {
       snprintf(modelPath, sizeof(modelPath), "%s/%s.stl", stlDir, argv[2]);

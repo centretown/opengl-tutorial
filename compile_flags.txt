@@ -1,2 +1,3 @@
--Isrc
+-Iinclude
+-Iglad
 -I/home/dave/src/assimp/include

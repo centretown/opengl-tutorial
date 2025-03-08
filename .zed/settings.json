@@ -4,6 +4,9 @@
 // see the documentation: https://zed.dev/docs/configuring-zed#settings-files
 {
   "show_signature_help_after_edits": false,
+  "clangd": {
+    "arguments": ["-background-index", "-compile-commands-dir=build"]
+  },
   "languages": {
     "C": {
       "tab_size": 2,
