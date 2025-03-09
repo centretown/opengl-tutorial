@@ -49,11 +49,23 @@ static float deltaTime = 0.0f;    // Time between current frame and last frame
 static float lastFrame = 0.0f;    // Time of last frame
 static float currentFrame = 0.0f; // Time of last frame
 
+#if defined(PLATFORM_DESKTOP)
+#define GLSL_VERSION 330
+#else // PLATFORM_ANDROID, PLATFORM_WEB
+#define GLSL_VERSION 100
+#endif
+
+#ifdef USE_OPEN_GLES
+Shader curShader("assets/shaders/gls100/depth.vert",
+                 "assets/shaders/gls100/depth.frag");
+Shader singleShader("assets/shaders/gls100/depth.vert",
+                    "assets/shaders/gls100/single.frag");
+#else
 Shader curShader("assets/shaders/gls330/depth.vert",
                  "assets/shaders/gls330/depth.frag");
-
 Shader singleShader("assets/shaders/gls330/depth.vert",
                     "assets/shaders/gls330/single.frag");
+#endif
 
 float rotation_angle = 0.0f;
 
@@ -65,11 +77,19 @@ int main(int argc, char **argv) {
     return 1;
   }
 
+#ifdef USE_OPEN_GLES
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     printf("Failed to initialize GLAD\n");
     glfwTerminate();
     return -1;
   }
+#else
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    printf("Failed to initialize GLAD\n");
+    glfwTerminate();
+    return -1;
+  }
+#endif // USE_OPEN_GLES
 
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
@@ -269,18 +289,44 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 
 GLFWwindow *InitWindow() {
   glfwInit();
+
+#ifdef USE_OPEN_GLES
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+  GLFWwindow *window = glfwCreateWindow(
+      SCREEN_WIDTH, SCREEN_HEIGHT, "OpenGL ES 2.0 Triangle (EGL)", NULL, NULL);
+  glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "LearnOpenGL OpenGL ES 2.0",
+                   NULL, NULL);
+  if (!window) {
+    glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
+    window = glfwCreateWindow(640, 480, "OpenGL ES 2.0 Triangle", NULL, NULL);
+    if (!window) {
+      glfwTerminate();
+      exit(EXIT_FAILURE);
+    }
+  }
+#else
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-
   GLFWwindow *window =
       glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "LearnOpenGL", NULL, NULL);
   if (window == NULL) {
     return window;
   }
+#endif // USE_OPEN_GLES
+
+#ifdef __APPLE__
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+  GLFWwindow *window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT,
+                                        "LearnOpenGL Apple", NULL, NULL);
+  if (window == NULL) {
+    return window;
+  }
+#endif
+
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   glfwSetCursorPosCallback(window, mouse_callback);

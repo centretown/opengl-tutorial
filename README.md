@@ -8,8 +8,9 @@ Good place to keep track of dependencies (Ubuntu)
 
 ```sh
 sudo apt install freeglut3-dev
-sudo apt-get install libglfw3-dev
-sudo apt-get install libglm-dev
+sudo apt install libglfw3-dev
+sudo apt install libglm-dev
+sudo apt install assimp-dev
 ```
 
 #### recommended
