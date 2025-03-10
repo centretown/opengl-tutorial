@@ -11,10 +11,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "win.hpp"
 #include "camera.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
+#include "win.hpp"
 
 #include <assimp/Importer.hpp>  // C++ importer interface
 #include <assimp/postprocess.h> // Post processing flags
@@ -46,7 +46,7 @@ Camera camera(glm::vec3(0.0f, 1.0f, 3.0f));
 // float lastY = SCREEN_HEIGHT / 2.0f;
 // bool firstMouse = true;
 
-#define USE_OPEN_GLES
+// #define USE_OPEN_GLES
 #if defined(USE_OPEN_GLES)
 #define GLSL_VERSION 100
 #elif defined(PLATFORM_DESKTOP)
@@ -69,31 +69,19 @@ Shader singleShader("assets/shaders/gls330/depth.vert",
 
 // float rotation_angle = 0.0f;
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 
   GLFWwindow *window = InitWindow(&camera, SCREEN_WIDTH, SCREEN_HEIGHT);
-  if (window == NULL)
-  {
+  if (window == NULL) {
     printf("Failed to create GLFW window\n");
     return 1;
   }
 
-#ifdef USE_OPEN_GLES
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-  {
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     printf("Failed to initialize GLAD\n");
     glfwTerminate();
     return -1;
   }
-#else
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-  {
-    printf("Failed to initialize GLAD\n");
-    glfwTerminate();
-    return -1;
-  }
-#endif // USE_OPEN_GLES
 
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
@@ -104,14 +92,12 @@ int main(int argc, char **argv)
   glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
   curShader.Build();
-  if (!curShader.IsValid())
-  {
+  if (!curShader.IsValid()) {
     glfwTerminate();
     return -1;
   }
   singleShader.Build();
-  if (!singleShader.IsValid())
-  {
+  if (!singleShader.IsValid()) {
     glfwTerminate();
     return -1;
   }
@@ -119,39 +105,39 @@ int main(int argc, char **argv)
   // ------------------------------------------------------------------
   float cubeVertices[] = {
       // positions          // texture Coords
-      -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-      0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-      -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+      -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 0.0f,
+      0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
+      -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
 
-      -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-      0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-      -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+      -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
+      0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+      -0.5f, 0.5f,  0.5f,  0.0f, 1.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f,
 
-      -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+      -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 1.0f, 1.0f,
       -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-      -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+      -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  0.5f,  1.0f, 0.0f,
 
-      0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-      0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-      0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+      0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
+      0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 0.0f, 1.0f,
+      0.5f,  -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 
-      -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
-      0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-      -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+      -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 1.0f,
+      0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
+      -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
 
-      -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-      0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-      -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, -0.5f, 0.5f, -0.5f, 0.0f, 1.0f};
+      -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
+      0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+      -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f};
 
   // positions          // texture Coords (note we set these higher than 1
   // (together with GL_REPEAT as texture wrapping mode). this will cause the
   // floor texture to repeat)
   float planeVertices[] = {
-      5.0f, -0.5f, 5.0f, 2.0f, 0.0f, -5.0f, -0.5f, 5.0f,
-      0.0f, 0.0f, -5.0f, -0.5f, -5.0f, 0.0f, 2.0f,
+      5.0f, -0.5f, 5.0f,  2.0f,  0.0f,  -5.0f, -0.5f, 5.0f,
+      0.0f, 0.0f,  -5.0f, -0.5f, -5.0f, 0.0f,  2.0f,
 
-      5.0f, -0.5f, 5.0f, 2.0f, 0.0f, -5.0f, -0.5f, -5.0f,
-      0.0f, 2.0f, 5.0f, -0.5f, -5.0f, 2.0f, 2.0f};
+      5.0f, -0.5f, 5.0f,  2.0f,  0.0f,  -5.0f, -0.5f, -5.0f,
+      0.0f, 2.0f,  5.0f,  -0.5f, -5.0f, 2.0f,  2.0f};
 
   unsigned int cubeVAO, cubeVBO;
   glGenVertexArrays(1, &cubeVAO);
@@ -195,8 +181,7 @@ int main(int argc, char **argv)
   // glDepthMask(GL_LESS);
   glEnable(GL_STENCIL_TEST);
 
-  while (!glfwWindowShouldClose(window))
-  {
+  while (!glfwWindowShouldClose(window)) {
     camera.ProcessInput(window);
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -256,8 +241,7 @@ glm::vec3 pointLightPositions[] = {
     glm::vec3(0.7f, 0.2f, 2.0f), glm::vec3(2.3f, -3.3f, -4.0f),
     glm::vec3(-4.0f, 2.0f, -12.0f), glm::vec3(0.0f, 0.0f, -3.0f)};
 
-void InitializeLights(Shader &targetShader, Camera &camera)
-{
+void InitializeLights(Shader &targetShader, Camera &camera) {
 
   targetShader.use();
   targetShader.setVec3("viewPos", camera.Position);
@@ -309,8 +293,7 @@ void InitializeLights(Shader &targetShader, Camera &camera)
   targetShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
 }
 
-void UpdateLights(Shader &targetShader, Camera &camera)
-{
+void UpdateLights(Shader &targetShader, Camera &camera) {
   targetShader.use();
   targetShader.setVec3("viewPos", camera.Position);
   targetShader.setVec3("spotLight.position", camera.Position);
@@ -318,8 +301,7 @@ void UpdateLights(Shader &targetShader, Camera &camera)
 }
 
 void DrawContainers(float scale, Shader &shader, unsigned int texture,
-                    int VAO)
-{
+                    int VAO) {
   glBindVertexArray(VAO);
   shader.use();
   // float scale = 1.1f;
