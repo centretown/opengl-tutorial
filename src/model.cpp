@@ -28,7 +28,7 @@ void Model::loadModel(string path) {
     Mesh &mesh = meshes[0];
     // loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
     TextureOptions options = (TextureOptions){
-        .minFilter = GL_LINEAR_MIPMAP_LINEAR,
+        .minFilter = GL_LINEAR,
         .magFilter = GL_LINEAR,
         .wrapS = GL_REPEAT,
         .wrapT = GL_REPEAT,
