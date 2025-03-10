@@ -58,11 +58,13 @@ TextureOptions specularOptions;
 
 // glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
   GLFWwindow *window = InitWindow();
 
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+  {
     printf("Failed to initialize GLAD\n");
     glfwTerminate();
     return -1;
@@ -74,46 +76,305 @@ int main(int argc, char **argv) {
 
   float vertices[] = {
       // positions          // normals           // texture coords
-      -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,  0.5f,  -0.5f,
-      -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 0.0f,
-      0.0f,  -1.0f, 1.0f,  1.0f,  0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f,
-      1.0f,  1.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  1.0f,
-      -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,
+      -0.5f,
+      -0.5f,
+      -0.5f,
+      0.0f,
+      0.0f,
+      -1.0f,
+      0.0f,
+      0.0f,
+      0.5f,
+      -0.5f,
+      -0.5f,
+      0.0f,
+      0.0f,
+      -1.0f,
+      1.0f,
+      0.0f,
+      0.5f,
+      0.5f,
+      -0.5f,
+      0.0f,
+      0.0f,
+      -1.0f,
+      1.0f,
+      1.0f,
+      0.5f,
+      0.5f,
+      -0.5f,
+      0.0f,
+      0.0f,
+      -1.0f,
+      1.0f,
+      1.0f,
+      -0.5f,
+      0.5f,
+      -0.5f,
+      0.0f,
+      0.0f,
+      -1.0f,
+      0.0f,
+      1.0f,
+      -0.5f,
+      -0.5f,
+      -0.5f,
+      0.0f,
+      0.0f,
+      -1.0f,
+      0.0f,
+      0.0f,
 
-      -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  0.5f,  -0.5f,
-      0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  0.0f,
-      0.0f,  1.0f,  1.0f,  1.0f,  0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-      1.0f,  1.0f,  -0.5f, 0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-      -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+      -0.5f,
+      -0.5f,
+      0.5f,
+      0.0f,
+      0.0f,
+      1.0f,
+      0.0f,
+      0.0f,
+      0.5f,
+      -0.5f,
+      0.5f,
+      0.0f,
+      0.0f,
+      1.0f,
+      1.0f,
+      0.0f,
+      0.5f,
+      0.5f,
+      0.5f,
+      0.0f,
+      0.0f,
+      1.0f,
+      1.0f,
+      1.0f,
+      0.5f,
+      0.5f,
+      0.5f,
+      0.0f,
+      0.0f,
+      1.0f,
+      1.0f,
+      1.0f,
+      -0.5f,
+      0.5f,
+      0.5f,
+      0.0f,
+      0.0f,
+      1.0f,
+      0.0f,
+      1.0f,
+      -0.5f,
+      -0.5f,
+      0.5f,
+      0.0f,
+      0.0f,
+      1.0f,
+      0.0f,
+      0.0f,
 
-      -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,
-      -0.5f, -1.0f, 0.0f,  0.0f,  1.0f,  1.0f,  -0.5f, -0.5f, -0.5f, -1.0f,
-      0.0f,  0.0f,  0.0f,  1.0f,  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,
-      0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,  -1.0f, 0.0f,  0.0f,  0.0f,  0.0f,
-      -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+      -0.5f,
+      0.5f,
+      0.5f,
+      -1.0f,
+      0.0f,
+      0.0f,
+      1.0f,
+      0.0f,
+      -0.5f,
+      0.5f,
+      -0.5f,
+      -1.0f,
+      0.0f,
+      0.0f,
+      1.0f,
+      1.0f,
+      -0.5f,
+      -0.5f,
+      -0.5f,
+      -1.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      1.0f,
+      -0.5f,
+      -0.5f,
+      -0.5f,
+      -1.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      1.0f,
+      -0.5f,
+      -0.5f,
+      0.5f,
+      -1.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      -0.5f,
+      0.5f,
+      0.5f,
+      -1.0f,
+      0.0f,
+      0.0f,
+      1.0f,
+      0.0f,
 
-      0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.5f,  0.5f,
-      -0.5f, 1.0f,  0.0f,  0.0f,  1.0f,  1.0f,  0.5f,  -0.5f, -0.5f, 1.0f,
-      0.0f,  0.0f,  0.0f,  1.0f,  0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,
-      0.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-      0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+      0.5f,
+      0.5f,
+      0.5f,
+      1.0f,
+      0.0f,
+      0.0f,
+      1.0f,
+      0.0f,
+      0.5f,
+      0.5f,
+      -0.5f,
+      1.0f,
+      0.0f,
+      0.0f,
+      1.0f,
+      1.0f,
+      0.5f,
+      -0.5f,
+      -0.5f,
+      1.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      1.0f,
+      0.5f,
+      -0.5f,
+      -0.5f,
+      1.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      1.0f,
+      0.5f,
+      -0.5f,
+      0.5f,
+      1.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      0.5f,
+      0.5f,
+      0.5f,
+      1.0f,
+      0.0f,
+      0.0f,
+      1.0f,
+      0.0f,
 
-      -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f,  1.0f,  0.5f,  -0.5f,
-      -0.5f, 0.0f,  -1.0f, 0.0f,  1.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  0.0f,
-      -1.0f, 0.0f,  1.0f,  0.0f,  0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,
-      1.0f,  0.0f,  -0.5f, -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  0.0f,  0.0f,
-      -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f,  1.0f,
+      -0.5f,
+      -0.5f,
+      -0.5f,
+      0.0f,
+      -1.0f,
+      0.0f,
+      0.0f,
+      1.0f,
+      0.5f,
+      -0.5f,
+      -0.5f,
+      0.0f,
+      -1.0f,
+      0.0f,
+      1.0f,
+      1.0f,
+      0.5f,
+      -0.5f,
+      0.5f,
+      0.0f,
+      -1.0f,
+      0.0f,
+      1.0f,
+      0.0f,
+      0.5f,
+      -0.5f,
+      0.5f,
+      0.0f,
+      -1.0f,
+      0.0f,
+      1.0f,
+      0.0f,
+      -0.5f,
+      -0.5f,
+      0.5f,
+      0.0f,
+      -1.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      -0.5f,
+      -0.5f,
+      -0.5f,
+      0.0f,
+      -1.0f,
+      0.0f,
+      0.0f,
+      1.0f,
 
-      -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.5f,  0.5f,
-      -0.5f, 0.0f,  1.0f,  0.0f,  1.0f,  1.0f,  0.5f,  0.5f,  0.5f,  0.0f,
-      1.0f,  0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-      1.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-      -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+      -0.5f,
+      0.5f,
+      -0.5f,
+      0.0f,
+      1.0f,
+      0.0f,
+      0.0f,
+      1.0f,
+      0.5f,
+      0.5f,
+      -0.5f,
+      0.0f,
+      1.0f,
+      0.0f,
+      1.0f,
+      1.0f,
+      0.5f,
+      0.5f,
+      0.5f,
+      0.0f,
+      1.0f,
+      0.0f,
+      1.0f,
+      0.0f,
+      0.5f,
+      0.5f,
+      0.5f,
+      0.0f,
+      1.0f,
+      0.0f,
+      1.0f,
+      0.0f,
+      -0.5f,
+      0.5f,
+      0.5f,
+      0.0f,
+      1.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      -0.5f,
+      0.5f,
+      -0.5f,
+      0.0f,
+      1.0f,
+      0.0f,
+      0.0f,
+      1.0f,
   };
 
   targetShader.Build();
   sourceShader.Build();
-  if (!targetShader.IsValid() || !sourceShader.IsValid()) {
+  if (!targetShader.IsValid() || !sourceShader.IsValid())
+  {
     glfwTerminate();
     return -1;
   }
@@ -152,17 +413,18 @@ int main(int argc, char **argv) {
   targetShader.setInt("material.specular", 1);
 
   glm::vec3 cubePositions[] = {
-      glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.0f, -15.0f),
+      glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(2.0f, 5.0f, -15.0f),
       glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(-3.8f, -2.0f, -12.3f),
-      glm::vec3(2.4f, -0.4f, -3.5f),  glm::vec3(-1.7f, 3.0f, -7.5f),
-      glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
-      glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f)};
+      glm::vec3(2.4f, -0.4f, -3.5f), glm::vec3(-1.7f, 3.0f, -7.5f),
+      glm::vec3(1.3f, -2.0f, -2.5f), glm::vec3(1.5f, 2.0f, -2.5f),
+      glm::vec3(1.5f, 0.2f, -1.5f), glm::vec3(-1.3f, 1.0f, -1.5f)};
 
   glm::vec3 pointLightPositions[] = {
       glm::vec3(0.7f, 0.2f, 2.0f), glm::vec3(2.3f, -3.3f, -4.0f),
       glm::vec3(-4.0f, 2.0f, -12.0f), glm::vec3(0.0f, 0.0f, -3.0f)};
 
-  while (!glfwWindowShouldClose(window)) {
+  while (!glfwWindowShouldClose(window))
+  {
     currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
@@ -222,10 +484,9 @@ int main(int argc, char **argv) {
     targetShader.setFloat("spotLight.outerCutOff",
                           glm::cos(glm::radians(15.0f)));
 
-    glm::mat4 projection =
-        glm::perspective(glm::radians(camera.Zoom),
-                         (float)1 / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
-    glm::mat4 view = camera.GetViewMatrix();
+    glm::vec3 axis(0.0f, 1.0f, 0.0f);
+    glm::mat4 view = camera.GetViewMatrix(axis);
+    glm::mat4 projection = camera.GetProjectionMatrix();
     targetShader.setMat4("projection", projection);
     targetShader.setMat4("view", view);
     // world transformation
@@ -239,7 +500,8 @@ int main(int argc, char **argv) {
     // render the cube
     glBindVertexArray(targetVAO);
     // glDrawArrays(GL_TRIANGLES, 0, 36);
-    for (unsigned int i = 0; i < 10; i++) {
+    for (unsigned int i = 0; i < 10; i++)
+    {
       glm::mat4 model = glm::mat4(1.0f);
       model = glm::translate(model, cubePositions[i]);
       float angle = 20.0f * i;
@@ -255,7 +517,8 @@ int main(int argc, char **argv) {
     sourceShader.setMat4("projection", projection);
     sourceShader.setMat4("view", view);
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++)
+    {
       model = glm::mat4(1.0f);
       model = glm::translate(model, pointLightPositions[i]);
       model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
@@ -276,7 +539,8 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-void processInput(GLFWwindow *window) {
+void processInput(GLFWwindow *window)
+{
 
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
@@ -295,13 +559,15 @@ void processInput(GLFWwindow *window) {
     camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+{
   windowWidth = width;
   windowHeight = height;
   glViewport(0, 0, width, height);
 }
 
-GLFWwindow *InitWindow() {
+GLFWwindow *InitWindow()
+{
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -309,7 +575,8 @@ GLFWwindow *InitWindow() {
 
   GLFWwindow *window =
       glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "LearnOpenGL", NULL, NULL);
-  if (window == NULL) {
+  if (window == NULL)
+  {
     printf("Failed to create GLFW window\n");
     return NULL;
   }
@@ -325,17 +592,20 @@ GLFWwindow *InitWindow() {
 bool leftButtonDown = false;
 
 void mouse_button_callback(GLFWwindow *window, int button, int action,
-                           int mods) {
+                           int mods)
+{
   leftButtonDown = (button == GLFW_MOUSE_BUTTON_LEFT && action == 1);
 }
 
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------
-void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
+void mouse_callback(GLFWwindow *window, double xposIn, double yposIn)
+{
   float xpos = static_cast<float>(xposIn);
   float ypos = static_cast<float>(yposIn);
 
-  if (firstMouse) {
+  if (firstMouse)
+  {
     lastX = xpos;
     lastY = ypos;
     firstMouse = false;
@@ -353,6 +623,7 @@ void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
-void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+{
   camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }

@@ -2,6 +2,8 @@ project(tutgl)
 
 add_library(davegl
     ../glad/src/glad.c
+    camera.cpp
+    win.cpp
     shader.cpp
     texture.cpp)
 

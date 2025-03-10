@@ -48,8 +48,22 @@ static float deltaTime = 0.0f;    // Time between current frame and last frame
 static float lastFrame = 0.0f;    // Time of last frame
 static float currentFrame = 0.0f; // Time of last frame
 
+#define USE_OPEN_GLES
+#if defined(USE_OPEN_GLES)
+#define GLSL_VERSION 100
+#elif defined(PLATFORM_DESKTOP)
+#define GLSL_VERSION 330
+#else // PLATFORM_ANDROID, PLATFORM_WEB
+#define GLSL_VERSION 100
+#endif // USE_OPEN_GLES
+
+#ifdef USE_OPEN_GLES
+Shader curShader("assets/shaders/gls100/target.vert",
+                 "assets/shaders/gls100/target.frag");
+#else
 Shader curShader("assets/shaders/gls330/target.vert",
                  "assets/shaders/gls330/target.frag");
+#endif
 
 const char *stlDir = "resources/stl";
 const char *objDir = "resources/objects";
@@ -58,26 +72,35 @@ char modelPath[1024];
 
 float rotation_angle = 0.0f;
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
-  if (argc > 1) {
+  if (argc > 1)
+  {
     const char *obj = argv[1];
-    if (argc > 2 && !strncmp("stl", obj, 3)) {
+    if (argc > 2 && !strncmp("stl", obj, 3))
+    {
       snprintf(modelPath, sizeof(modelPath), "%s/%s.stl", stlDir, argv[2]);
-    } else {
+    }
+    else
+    {
       snprintf(modelPath, sizeof(modelPath), "%s/%s/%s.obj", objDir, obj, obj);
     }
-  } else {
+  }
+  else
+  {
     strncpy(modelPath, defaultPath, sizeof(modelPath));
   }
 
   GLFWwindow *window = InitWindow();
-  if (window == NULL) {
+  if (window == NULL)
+  {
     printf("Failed to create GLFW window\n");
     return 1;
   }
 
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+  {
     printf("Failed to initialize GLAD\n");
     glfwTerminate();
     return -1;
@@ -87,7 +110,8 @@ int main(int argc, char **argv) {
   glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
   curShader.Build();
-  if (!curShader.IsValid()) {
+  if (!curShader.IsValid())
+  {
     glfwTerminate();
     return -1;
   }
@@ -104,7 +128,8 @@ int main(int argc, char **argv) {
   // diffx /= 2.0f;
   InitializeLights(curShader, camera);
 
-  while (!glfwWindowShouldClose(window)) {
+  while (!glfwWindowShouldClose(window))
+  {
     currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
@@ -117,9 +142,10 @@ int main(int argc, char **argv) {
 
     UpdateLights(curShader, camera);
     // view/projection transformations
-    glm::mat4 projection = glm::perspective(
-        glm::radians(camera.Zoom), windowWidth / windowHeight, 0.1f, 100.0f);
-    glm::mat4 view = camera.GetViewMatrix();
+    // glm::vec3 axis(0.0f, 1.0f, 0.0f);
+    glm::vec3 axis(0.0f, 1.0f, 0.0f);
+    glm::mat4 view = camera.GetViewMatrix(axis);
+    glm::mat4 projection = camera.GetProjectionMatrix();
 
     curShader.setMat4("projection", projection);
     curShader.setMat4("view", view);
@@ -131,7 +157,6 @@ int main(int argc, char **argv) {
     // it's a bit too big for our scene, so scale it down
     model = glm::scale(model, glm::vec3(scale, scale, scale));
     // rotate about y-axis
-    glm::vec3 axis(0.0f, 1.0f, 0.0f);
     model = glm::rotate(model, glm::radians(rotation_angle), axis);
     curShader.setMat4("model", model);
 
@@ -144,7 +169,8 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-void processInput(GLFWwindow *window) {
+void processInput(GLFWwindow *window)
+{
 
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
@@ -160,10 +186,12 @@ void processInput(GLFWwindow *window) {
       glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     camera.ProcessKeyboard(BACKWARD, deltaTime);
 
-  if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+  if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+  {
     rotation_angle -= 1.0;
   }
-  if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS) {
+  if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS)
+  {
     rotation_angle += 1.0;
   }
 
@@ -175,13 +203,15 @@ void processInput(GLFWwindow *window) {
     camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+{
   windowWidth = width;
   windowHeight = height;
   glViewport(0, 0, width, height);
 }
 
-GLFWwindow *InitWindow() {
+GLFWwindow *InitWindow()
+{
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -192,7 +222,8 @@ GLFWwindow *InitWindow() {
 
   GLFWwindow *window =
       glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "LearnOpenGL", NULL, NULL);
-  if (window == NULL) {
+  if (window == NULL)
+  {
     return window;
   }
   glfwMakeContextCurrent(window);
@@ -209,17 +240,20 @@ GLFWwindow *InitWindow() {
 bool leftButtonDown = false;
 
 void mouse_button_callback(GLFWwindow *window, int button, int action,
-                           int mods) {
+                           int mods)
+{
   leftButtonDown = (button == GLFW_MOUSE_BUTTON_LEFT && action == 1);
 }
 
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------
-void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
+void mouse_callback(GLFWwindow *window, double xposIn, double yposIn)
+{
   float xpos = static_cast<float>(xposIn);
   float ypos = static_cast<float>(yposIn);
 
-  if (firstMouse) {
+  if (firstMouse)
+  {
     lastX = xpos;
     lastY = ypos;
     firstMouse = false;
@@ -237,7 +271,8 @@ void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
-void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+{
   camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
@@ -245,7 +280,8 @@ glm::vec3 pointLightPositions[] = {
     glm::vec3(0.7f, 0.2f, 2.0f), glm::vec3(2.3f, -3.3f, -4.0f),
     glm::vec3(-4.0f, 2.0f, -12.0f), glm::vec3(0.0f, 0.0f, -3.0f)};
 
-void InitializeLights(Shader &targetShader, Camera &camera) {
+void InitializeLights(Shader &targetShader, Camera &camera)
+{
 
   targetShader.use();
   targetShader.setVec3("viewPos", camera.Position);
@@ -297,7 +333,8 @@ void InitializeLights(Shader &targetShader, Camera &camera) {
   targetShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
 }
 
-void UpdateLights(Shader &targetShader, Camera &camera) {
+void UpdateLights(Shader &targetShader, Camera &camera)
+{
   targetShader.use();
   targetShader.setVec3("viewPos", camera.Position);
   targetShader.setVec3("spotLight.position", camera.Position);
