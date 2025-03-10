@@ -3,11 +3,18 @@ cmake_policy(VERSION 3.0...3.28)
 
 project(tutgl)
 
-set(CMAKE_CXX_STANDARD 14) # this does nothing for MSVC, use target_compile_options below
+# options
+# set(CMAKE_BUILD_TYPE Debug)
+
+message(STATUS "Host system processor: ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+IF(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "aarch64")
+  set(CMAKE_CXX_FLAGS -DUSE_OPEN_GLES)
+ENDIF()
+
+# minimum is 14 for now
+set(CMAKE_CXX_STANDARD 17) # this does nothing for MSVC, use target_compile_options below
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
-set(CMAKE_BUILD_TYPE Debug)
-#set(CMAKE_CXX_FLAGS -DUSE_OPEN_GLES)
 
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build (Debug or Release)" FORCE)

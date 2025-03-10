@@ -45,7 +45,7 @@ int Shader::Build() {
   unsigned int vertex;
   unsigned int fragment;
   int success;
-  char infoLog[512];
+  char infoLog[2048];
 
   // compile shaders
   vertex = glCreateShader(GL_VERTEX_SHADER);
@@ -56,7 +56,7 @@ int Shader::Build() {
   // check for compile errors if any
   glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
   if (!success) {
-    glGetShaderInfoLog(vertex, 512, NULL, infoLog);
+    glGetShaderInfoLog(vertex, sizeof(infoLog), NULL, infoLog);
     printf("'%s' ERROR::SHADER::VERTEX::COMPILATION_FAILED\n%s\n", vertexPath,
            infoLog);
     status = SHADER_ERR_COMPILE_VERTEX;
@@ -69,7 +69,7 @@ int Shader::Build() {
   glCompileShader(fragment);
   glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
   if (!success) {
-    glGetShaderInfoLog(fragment, 512, NULL, infoLog);
+    glGetShaderInfoLog(fragment, sizeof(infoLog), NULL, infoLog);
     printf("'%s' ERROR::SHADER::SHADER::COMPILATION_FAILED\n%s\n", fragmentPath,
            infoLog);
     status = SHADER_ERR_COMPILE_FRAGMENT;
@@ -84,7 +84,7 @@ int Shader::Build() {
   // print linking errors if any
   glGetProgramiv(ProgramID, GL_LINK_STATUS, &success);
   if (!success) {
-    glGetProgramInfoLog(ProgramID, 512, NULL, infoLog);
+    glGetProgramInfoLog(ProgramID, sizeof(infoLog), NULL, infoLog);
     printf("'%s' '%s' ERROR::SHADER::PROGRAM::LINKING_FAILED\n%s\n", vertexPath,
            fragmentPath, infoLog);
     status = SHADER_ERR_LINK_PROGRAM;
