@@ -20,5 +20,16 @@
       "format_on_save": "on",
       "allow_rewrap": "in_selections"
     }
+  },
+  "experimental.theme_overrides": {
+    "editor.background": "#333",
+    "syntax": {
+      "comment": {
+        "font_weight": 900
+      },
+      "comment.doc": {
+        "font_weight": 900
+      }
+    }
   }
 }

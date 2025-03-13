@@ -33,7 +33,7 @@ void Model::loadModel(string path) {
         .wrapS = GL_REPEAT,
         .wrapT = GL_REPEAT,
     };
-    string filename = "assets/textures/red.jpg";
+    string filename = "assets/textures/red.png";
     Texture texture = {0};
     texture.id = MakeTexture(filename.c_str(), &options);
     texture.type = "texture_diffuse";
