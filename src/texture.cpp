@@ -3,6 +3,8 @@
 
 #include "texture.hpp"
 
+#include <vector>
+
 static GLenum GLformat(int nrChannels) {
   return (nrChannels == 3) ? GL_RGB : (nrChannels == 4) ? GL_RGBA : GL_RED;
 }
@@ -52,14 +54,13 @@ unsigned int MakeTexture(const char *filename, TextureOptions *options) {
 
 unsigned int LoadCubemap(std::string cubeDirectory) {
   printf("LoadCubemap skyboxPath=\"%s\"\n", cubeDirectory.c_str());
+  unsigned int textureID;
+  glGenTextures(1, &textureID);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
   std::vector<std::string> faces = {
       std::string("/right"),  std::string("/left"),  std::string("/top"),
       std::string("/bottom"), std::string("/front"), std::string("/back")};
-
-  unsigned int textureID;
-  glGenTextures(1, &textureID);
-  glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
   int width, height, nrChannels;
   for (unsigned int i = 0; i < faces.size(); i++) {
@@ -82,6 +83,7 @@ unsigned int LoadCubemap(std::string cubeDirectory) {
     fprintf(stderr, "Cubemap texture loaded at path: %s\n", f.c_str());
     stbi_image_free(data);
   }
+
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

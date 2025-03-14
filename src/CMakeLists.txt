@@ -6,6 +6,7 @@ add_library(davegl
     win.cpp
     input_options.cpp
     shader.cpp
+    lights.cpp
     texture.cpp)
 
 target_include_directories(davegl

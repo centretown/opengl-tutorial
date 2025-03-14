@@ -27,11 +27,11 @@ void Model::loadModel(string path) {
   if (meshes.size() == 1 && textures_loaded.size() == 0) {
     Mesh &mesh = meshes[0];
     // loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-    TextureOptions options = (TextureOptions){
-        .minFilter = GL_LINEAR,
-        .magFilter = GL_LINEAR,
-        .wrapS = GL_REPEAT,
-        .wrapT = GL_REPEAT,
+    TextureOptions options = {
+        GL_LINEAR,
+        GL_LINEAR,
+        GL_REPEAT,
+        GL_REPEAT,
     };
     string filename = "assets/textures/red.png";
     Texture texture = {0};
@@ -131,11 +131,11 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
 vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type,
                                             string typeName) {
   vector<Texture> textures;
-  TextureOptions options = (TextureOptions){
-      .minFilter = GL_LINEAR_MIPMAP_LINEAR,
-      .magFilter = GL_LINEAR,
-      .wrapS = GL_REPEAT,
-      .wrapT = GL_REPEAT,
+  TextureOptions options = {
+      GL_LINEAR_MIPMAP_LINEAR,
+      GL_LINEAR,
+      GL_REPEAT,
+      GL_REPEAT,
   };
 
   for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {

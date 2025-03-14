@@ -1,7 +1,6 @@
 #include "input_options.hpp"
 
 #include <cstdio>
-#include <cstring>
 #include <string>
 
 const std::string resDir = "../resources/";
@@ -26,21 +25,17 @@ int InputOptions::Parse(const char *title, int argc, const char **argv,
       ("d,directory", "Model Directory", cxxopts::value<std::string>(),
        "stl") //
 
-      ("m,model", "Model File Name eg. enao.stl", cxxopts::value<std::string>(),
+      ("m,model", "Model File Name eg. 'enao.stl'",
+       cxxopts::value<std::string>(),
        "sphereofthedark") //
 
-      ("s,skybox", "Skybox Directory eg. islands",
+      ("s,skybox", "Skybox Directory eg. 'islands'",
        cxxopts::value<std::string>(),
        "islands") //
 
       ("h,help", "Print help"); //
 
   cxxopts::ParseResult result = options.parse(argc, argv);
-
-  if (result.count("help")) {
-    printf("%s", options.help({"", "Group"}).c_str());
-    return true;
-  }
 
   if (result.count("d")) {
     modelDir = result["d"].as<std::string>().c_str();
@@ -53,6 +48,14 @@ int InputOptions::Parse(const char *title, int argc, const char **argv,
   if (result.count("s")) {
     skyboxName = result["s"].as<std::string>();
   }
+
+  if (result.count("help")) {
+    printf("%s", options.help({"", "Group"}).c_str());
+    printf("directory='%s' model='%s' skybox='%s'\n\n", modelDir.c_str(),
+           modelName.c_str(), skyboxName.c_str());
+    exit(0);
+  }
+
   if (log)
     fprintf(stderr, "directory='%s' model='%s' skybox='%s'\n", modelDir.c_str(),
             modelName.c_str(), skyboxName.c_str());
