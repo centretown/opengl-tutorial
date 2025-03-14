@@ -24,8 +24,6 @@
 #include <assimp/postprocess.h> // Post processing flags
 #include <assimp/scene.h>       // Output data structure
 
-// #define MAX_ANGLE 180.0f
-// #define MIN_ANGLE 15.0f
 #define SCREEN_WIDTH 1024
 #define SCREEN_HEIGHT 1024
 float windowWidth = (float)SCREEN_WIDTH;

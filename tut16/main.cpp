@@ -43,8 +43,8 @@ Camera camera(glm::vec3(0.0f, 1.0f, 3.0f));
 #endif // USE_OPEN_GLES
 
 #ifdef USE_OPEN_GLES
-Shader shader("assets/shaders/gls100/depth.vert",
-              "assets/shaders/gls100/depth.frag");
+Shader curShader("assets/shaders/gls100/depth.vert",
+                 "assets/shaders/gls100/depth.frag");
 Shader screenShader("assets/shaders/gls100/frame.vert",
                     "assets/shaders/gls100/frame.frag");
 #else
