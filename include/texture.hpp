@@ -1,6 +1,8 @@
 #pragma once
 
 #include <glad.h>
+#include <string>
+#include <vector>
 
 struct TextureOptions {
   // GL_NEAREST: results in blocked patterns where we can clearly see the pixels
@@ -22,3 +24,4 @@ struct TextureOptions {
 };
 
 unsigned int MakeTexture(const char *filename, TextureOptions *options);
+unsigned int LoadCubemap(std::string cubeDirectory);

@@ -17,6 +17,7 @@
 #include "camera.hpp"
 #include "model.hpp"
 #include "shader.hpp"
+#include "texture.hpp"
 #include "win.hpp"
 
 #include <assimp/Importer.hpp>  // C++ importer interface
@@ -34,8 +35,6 @@ void InitializeLights(Shader &targetShader, Camera &camera);
 void UpdateLights(Shader &targetShader, Camera &camera);
 // void DrawContainers(float scale);
 void DrawContainers(float scale, Shader &shader, unsigned int texture, int VAO);
-unsigned int loadCubemap(std::vector<std::string> faces);
-unsigned int loadTexture(char const *path);
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 // float lastX = SCREEN_WIDTH / 2.0f;
@@ -63,24 +62,21 @@ Shader skyboxShader("assets/shaders/gls330/skybox.vert",
                     "assets/shaders/gls330/skybox.frag");
 #endif
 
-// float rotation_angle = 0.0f;
+// const char *stlDir = "../resources/stl";
+// const char *objDir = "../resources/objects";
+// const char *defaultModelPath = "../resources/objects/cyborg/cyborg.obj";
+// char modelPath[1024];
 
-const char *stlDir = "../resources/stl";
-const char *objDir = "../resources/objects";
-const char *defaultPath = "../resources/objects/cyborg/cyborg.obj";
-char modelPath[1024];
+// const char *skyboxDir = "../resources/textures/skybox";
+// const char *defaultSkyboxDir = "../resources/textures/skybox/islands";
+// char skyboxPath[1024];
+#include "input_options.hpp"
 
-int main(int argc, char **argv) {
-  if (argc > 1) {
-    const char *obj = argv[1];
-    if (argc > 2 && !strncmp("stl", obj, 3)) {
-      snprintf(modelPath, sizeof(modelPath), "%s/%s.stl", stlDir, argv[2]);
-    } else {
-      snprintf(modelPath, sizeof(modelPath), "%s/%s/%s.obj", objDir, obj, obj);
-    }
-  } else {
-    strncpy(modelPath, defaultPath, sizeof(modelPath));
-  }
+int main(int argc, const char **argv) {
+  InputOptions args;
+  args.Parse("tut18", argc, argv);
+  printf("modelPath=\"%s\" skyboxPath=\"%s\"\n", args.modelPath.c_str(),
+         args.skyboxPath.c_str());
 
   GLFWwindow *window = InitWindow(&camera, SCREEN_WIDTH, SCREEN_HEIGHT);
   if (window == NULL) {
@@ -104,41 +100,6 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  // // set up vertex data (and buffer(s)) and configure vertex attributes
-  // // ------------------------------------------------------------------
-  // float cubeVertices[] = {
-  //     // positions          // normals
-  //     -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.5f,  -0.5f, -0.5f,
-  //     0.0f,  0.0f,  -1.0f, 0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f,
-  //     0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, -0.5f, 0.5f,  -0.5f,
-  //     0.0f,  0.0f,  -1.0f, -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f,
-
-  //     -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.5f,  -0.5f, 0.5f,
-  //     0.0f,  0.0f,  1.0f,  0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-  //     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  -0.5f, 0.5f,  0.5f,
-  //     0.0f,  0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,
-
-  //     -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  -0.5f, 0.5f,  -0.5f,
-  //     -1.0f, 0.0f,  0.0f,  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,
-  //     -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  -0.5f, -0.5f, 0.5f,
-  //     -1.0f, 0.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,
-
-  //     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.5f,  0.5f,  -0.5f,
-  //     1.0f,  0.0f,  0.0f,  0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,
-  //     0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.5f,  -0.5f, 0.5f,
-  //     1.0f,  0.0f,  0.0f,  0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-
-  //     -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.5f,  -0.5f, -0.5f,
-  //     0.0f,  -1.0f, 0.0f,  0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,
-  //     0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  -0.5f, -0.5f, 0.5f,
-  //     0.0f,  -1.0f, 0.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,
-
-  //     -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  -0.5f,
-  //     0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-  //     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  0.5f,
-  //     0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f};
-  //
-
   float skyboxVertices[] = {
       // positions
       -1.0f, 1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  -1.0f, -1.0f,
@@ -159,20 +120,6 @@ int main(int argc, char **argv) {
       -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f,
       1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f};
 
-  // cube VAO
-  // unsigned int cubeVAO, cubeVBO;
-  // glGenVertexArrays(1, &cubeVAO);
-  // glGenBuffers(1, &cubeVBO);
-  // glBindVertexArray(cubeVAO);
-  // glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-  // glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices,
-  //              GL_STATIC_DRAW);
-  // glEnableVertexAttribArray(0);
-  // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void
-  // *)0); glEnableVertexAttribArray(1); glVertexAttribPointer(1, 3, GL_FLOAT,
-  // GL_FALSE, 6 * sizeof(float),
-  //                       (void *)(3 * sizeof(float)));
-
   // skyboxVAO VAO
   unsigned int skyboxVAO, skyboxVBO;
   glGenVertexArrays(1, &skyboxVAO);
@@ -183,22 +130,13 @@ int main(int argc, char **argv) {
                GL_STATIC_DRAW);
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-  // -------------
-  // TextureOptions options;
-  // unsigned int cubeTexture =
-  //     MakeTexture("../resources/textures/container2.png", &options);
 
-  std::vector<std::string> faces{
-      std::string("../resources/textures/skybox/right.jpg"),
-      std::string("../resources/textures/skybox/left.jpg"),
-      std::string("../resources/textures/skybox/top.jpg"),
-      std::string("../resources/textures/skybox/bottom.jpg"),
-      std::string("../resources/textures/skybox/front.jpg"),
-      std::string("../resources/textures/skybox/back.jpg")};
+  printf("modelPath=\"%s\" skyboxPath=\"%s\"\n", args.modelPath.c_str(),
+         args.skyboxPath.c_str());
 
-  unsigned int cubemapTexture = loadCubemap(faces);
+  unsigned int cubemapTexture = LoadCubemap(args.skyboxPath);
 
-  Model curModel(modelPath);
+  Model curModel(args.modelPath);
   // calculate scale
   float scale = 1.0;
   float diffx = curModel.max.x - curModel.min.x;
@@ -209,8 +147,6 @@ int main(int argc, char **argv) {
   float scaleY = 1.0 / diffy;
   diffy = (curModel.min.y + diffy) * scaleY;
   diffx /= 2.0f;
-
-  // InitializeLights(curShader, camera);
 
   // shader configuration
   // --------------------
@@ -351,77 +287,4 @@ void DrawContainers(float scale, Shader &shader, unsigned int texture,
   model = glm::scale(model, glm::vec3(scale, scale, scale));
   shader.setMat4("model", model);
   glDrawArrays(GL_TRIANGLES, 0, 36);
-}
-
-// loads a cubemap texture from 6 individual texture faces
-// order:
-// +X (right)
-// -X (left)
-// +Y (top)
-// -Y (bottom)
-// +Z (front)
-// -Z (back)
-// -------------------------------------------------------
-unsigned int loadCubemap(std::vector<std::string> faces) {
-  unsigned int textureID;
-  glGenTextures(1, &textureID);
-  glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-
-  int width, height, nrChannels;
-  for (unsigned int i = 0; i < faces.size(); i++) {
-    unsigned char *data =
-        stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
-    if (data) {
-      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height,
-                   0, GL_RGB, GL_UNSIGNED_BYTE, data);
-      printf("Cubemap texture loaded at path: %s\n", faces[i].c_str());
-      stbi_image_free(data);
-    } else {
-      printf("Cubemap texture failed to load at path: %s\n", faces[i].c_str());
-      stbi_image_free(data);
-    }
-  }
-  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-  return textureID;
-}
-
-unsigned int loadTexture(char const *path) {
-  unsigned int textureID;
-  glGenTextures(1, &textureID);
-
-  int width, height, nrComponents;
-  unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
-  if (data) {
-    GLenum format;
-    if (nrComponents == 1)
-      format = GL_RED;
-    else if (nrComponents == 3)
-      format = GL_RGB;
-    else if (nrComponents == 4)
-      format = GL_RGBA;
-
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format,
-                 GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                    GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    printf("Cubemap texture loaded at path: %s\n", path);
-
-    stbi_image_free(data);
-  } else {
-    printf("Cubemap texture failed to load at path: %s\n", path);
-    stbi_image_free(data);
-  }
-
-  return textureID;
 }

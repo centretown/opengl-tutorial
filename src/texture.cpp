@@ -1,9 +1,11 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-// #include "../glad/glad.h"
-
 #include "texture.hpp"
+
+static GLenum GLformat(int nrChannels) {
+  return (nrChannels == 3) ? GL_RGB : (nrChannels == 4) ? GL_RGBA : GL_RED;
+}
 
 unsigned int MakeTexture(const char *filename, TextureOptions *options) {
   unsigned int texture = 0;
@@ -25,9 +27,7 @@ unsigned int MakeTexture(const char *filename, TextureOptions *options) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, options->minFilter);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, options->magFilter);
 
-  GLenum format = (nrChannels == 3)   ? GL_RGB
-                  : (nrChannels == 4) ? GL_RGBA
-                                      : GL_RED;
+  GLenum format = GLformat(nrChannels);
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format,
                GL_UNSIGNED_BYTE, imageData);
@@ -38,4 +38,55 @@ unsigned int MakeTexture(const char *filename, TextureOptions *options) {
   stbi_image_free(imageData);
 
   return texture;
+}
+
+// loads a cubemap texture from 6 individual texture faces
+// order:
+// +X (right)
+// -X (left)
+// +Y (top)
+// -Y (bottom)
+// +Z (front)
+// -Z (back)
+// -------------------------------------------------------
+
+unsigned int LoadCubemap(std::string cubeDirectory) {
+  printf("LoadCubemap skyboxPath=\"%s\"\n", cubeDirectory.c_str());
+
+  std::vector<std::string> faces = {
+      std::string("/right"),  std::string("/left"),  std::string("/top"),
+      std::string("/bottom"), std::string("/front"), std::string("/back")};
+
+  unsigned int textureID;
+  glGenTextures(1, &textureID);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+  int width, height, nrChannels;
+  for (unsigned int i = 0; i < faces.size(); i++) {
+    std::string f = cubeDirectory + faces[i] + ".png";
+    unsigned char *data = stbi_load(f.c_str(), &width, &height, &nrChannels, 0);
+    if (!data) {
+      f = cubeDirectory + faces[i] + ".jpg";
+      data = stbi_load(f.c_str(), &width, &height, &nrChannels, 0);
+    }
+
+    if (!data) {
+      fprintf(stderr, "Cubemap texture failed to load at path: %s\n",
+              f.c_str());
+      continue;
+    }
+
+    GLenum format = GLformat(nrChannels);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height,
+                 0, format, GL_UNSIGNED_BYTE, data);
+    fprintf(stderr, "Cubemap texture loaded at path: %s\n", f.c_str());
+    stbi_image_free(data);
+  }
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+  return textureID;
 }

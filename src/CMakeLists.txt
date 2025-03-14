@@ -4,6 +4,7 @@ add_library(davegl
     ../glad/src/glad.c
     camera.cpp
     win.cpp
+    input_options.cpp
     shader.cpp
     texture.cpp)
 
