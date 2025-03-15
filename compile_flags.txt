@@ -2,3 +2,6 @@
 -Iglad/include
 -Iglad/include/glad
 -I/home/dave/src/assimp/include
+-Iexternal/cxxopts/include
+-Iexternal/imgui
+-Iexternal/imgui/backends

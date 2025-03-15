@@ -12,4 +12,5 @@ add_library(davegl
 target_include_directories(davegl
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../external/cxxopts/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../glad/include/glad)
